@@ -1,0 +1,23 @@
+{
+  "overview": "CORE Theory Library is a fitness platform with 50+ exercises and a CORE AI assistant that provides personalized guidance on nutrition, diet, and exercise recommendations through a conversational chat interface.",
+  "features": [
+    "50+ exercise library across 8 categories",
+    "CORE AI chat assistant for nutrition and diet guidance",
+    "Personalized exercise recommendations",
+    "Animated exercise demonstrations",
+    "Dark/light mode",
+    "Search and filtering by difficulty, muscle group, and equipment",
+    "Responsive design for all devices"
+  ],
+  "category": "health-fitness",
+  "tags": [
+    "fitness",
+    "exercise",
+    "nutrition",
+    "diet",
+    "ai-assistant",
+    "workout",
+    "health"
+  ],
+  "last_updated": "2026-04-19T16:25:11.960Z"
+}

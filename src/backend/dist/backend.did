@@ -1,0 +1,11 @@
+service : {
+  /// Query CORE AI with a conversation history.
+  /// messages: array of { role: "user" | "assistant"; content: Text }
+  /// Returns the AI response text or an error message string.
+  queryAI: (messages: vec record {
+                            content: text;
+                            role: text;
+                          }) -> (text);
+  /// Update the OpenRouter API key. Only callable by canister controllers.
+  setApiKey: (key: text) -> ();
+}

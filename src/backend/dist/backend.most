@@ -1,0 +1,29 @@
+// Version: 1.0.0
+type HttpHeader__837997805 = {name : Text; value : Text};
+type HttpRequestArgs__893152371 =
+  {
+    body : ?Blob;
+    headers : [HttpHeader__837997805];
+    is_replicated : ?Bool;
+    max_response_bytes : ?Nat64;
+    method : {#get; #head; #post};
+    transform :
+      ?{
+         context : Blob;
+         function :
+           shared query {context : Blob; response : HttpResponse__280953736} ->
+             async HttpResponse__280953736
+       };
+    url : Text
+  };
+type HttpResponse__280953736 =
+  {body : Blob; headers : [HttpHeader__837997805]; status : Nat};
+actor {
+  stable var apiKey : Text;
+  stable ic :
+    actor {
+      http_request :
+        shared HttpRequestArgs__893152371 -> async HttpResponse__280953736
+    };
+  stable systemPrompt : Text
+};
