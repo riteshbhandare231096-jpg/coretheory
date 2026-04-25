@@ -13,6 +13,7 @@ const CATEGORY_ICON: Record<Category, string> = {
   Strength: "🏋️",
   Balance: "⚖️",
   Mobility: "🔄",
+  Warmup: "🌅",
 };
 
 // Category gradient map for card thumbnails
@@ -25,6 +26,7 @@ const CATEGORY_GRADIENT: Record<Category, string> = {
   Strength: "from-amber-500/20 via-yellow-500/10 to-background",
   Balance: "from-sky-500/20 via-indigo-500/10 to-background",
   Mobility: "from-lime-500/20 via-emerald-500/10 to-background",
+  Warmup: "from-yellow-500/20 via-orange-500/10 to-background",
 };
 
 interface ExerciseCardProps {

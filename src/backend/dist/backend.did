@@ -1,11 +1,169 @@
+type WomenExerciseSection = 
+ variant {
+   advanced;
+   basic;
+ };
+type WomenExercise = 
+ record {
+   benefits: vec text;
+   category: text;
+   description: text;
+   id: nat;
+   instructions: vec text;
+   section: WomenExerciseSection;
+   title: text;
+   videoUrl: text;
+ };
+type WebhookResult = 
+ variant {
+   err: text;
+   ok;
+ };
+type UserProfilePublic = 
+ record {
+   expiresAt: opt Timestamp;
+   isDisabled: bool;
+   plan: opt PlanDuration;
+   startedAt: opt Timestamp;
+   stripeCustomerId: opt text;
+   stripeSubscriptionId: opt text;
+   tier: Tier;
+   udidUploadPath: text;
+   udidUploadTime: opt Timestamp;
+   udidVerified: bool;
+   userId: UserId;
+ };
+type UserId = principal;
+type UdidUploadResult = 
+ variant {
+   err: text;
+   ok;
+ };
+type Timestamp = int;
+type Tier = 
+ variant {
+   free;
+   premium;
+ };
+type SubscriptionPlan = 
+ record {
+   displayLabel: text;
+   duration: PlanDuration;
+   priceUsdCents: nat;
+   stripePriceId: text;
+ };
+type ScienceArticle = 
+ record {
+   category: ArticleCategory;
+   content: text;
+   id: nat;
+   publishedDate: text;
+   readingMinutes: nat;
+   summary: text;
+   title: text;
+ };
+type PlanDuration = 
+ variant {
+   months12;
+   months3;
+   months6;
+   months9;
+ };
+type PersonalBest = 
+ record {
+   exerciseName: text;
+   loggedAt: Timestamp;
+   reps: nat;
+   weightKg: float64;
+ };
+type MetricResult = 
+ variant {
+   err: text;
+   ok;
+ };
+type MetricEntry = 
+ record {
+   bodyFatPct: opt float64;
+   loggedAt: Timestamp;
+   weightKg: float64;
+ };
+type FounderDashboardStats = 
+ record {
+   freeCount: nat;
+   months12Count: nat;
+   months3Count: nat;
+   months6Count: nat;
+   months9Count: nat;
+   totalRevenue: nat;
+ };
+type DisabledExercise = 
+ record {
+   benefits: vec text;
+   category: text;
+   description: text;
+   difficulty: text;
+   id: nat;
+   instructions: vec text;
+   title: text;
+   videoUrl: text;
+ };
+type CheckoutResult = 
+ variant {
+   err: text;
+   ok: record {
+         sessionId: text;
+         url: text;
+       };
+ };
+type ArticleCategory = 
+ variant {
+   fatLoss;
+   hypertrophy;
+   nutrition;
+   recovery;
+ };
+type AiQueryResult = 
+ variant {
+   err: text;
+   ok: record {
+         messagesRemaining: opt nat;
+         response: text;
+       };
+ };
 service : {
-  /// Query CORE AI with a conversation history.
-  /// messages: array of { role: "user" | "assistant"; content: Text }
-  /// Returns the AI response text or an error message string.
+  cancelSubscription: () -> ();
+  clearMyMetrics: () -> ();
+  createCheckoutSession: (duration: PlanDuration) -> (CheckoutResult);
+  getArticle: (id: nat) -> (opt ScienceArticle) query;
+  getArticles: () -> (vec ScienceArticle) query;
+  getDisabledExercises: () -> (vec DisabledExercise) query;
+  getFounderDashboardStats: () -> (FounderDashboardStats) query;
+  getIsDisabledVerified: () -> (bool) query;
+  getIsFounder: () -> (bool) query;
+  getMyMetrics: () -> (vec MetricEntry) query;
+  getMyPersonalBests: () -> (vec PersonalBest) query;
+  getMyProfile: () -> (UserProfilePublic);
+  getSubscriptionPlans: () -> (vec SubscriptionPlan) query;
+  getWomenDashboardAccess: () -> (bool) query;
+  getWomenExercises: () ->
+   (record {
+      advanced: vec WomenExercise;
+      basic: vec WomenExercise;
+    }) query;
+  logMetric: (weightKg: float64, bodyFatPct: opt float64) -> (MetricResult);
+  logPersonalBest: (exerciseName: text, weightKg: float64, reps: nat) ->
+   (MetricResult);
   queryAI: (messages: vec record {
                             content: text;
                             role: text;
                           }) -> (text);
-  /// Update the OpenRouter API key. Only callable by canister controllers.
+  queryAIGated: (messages: vec record {
+                                 content: text;
+                                 role: text;
+                               }, messagesInSession: nat) -> (AiQueryResult);
   setApiKey: (key: text) -> ();
+  setFounderPrincipal: (p: principal) -> ();
+  setStripeKey: (key: text) -> ();
+  stripeWebhook: (payload: text) -> (WebhookResult);
+  submitUdidUpload: (uploadPath: text) -> (UdidUploadResult);
 }

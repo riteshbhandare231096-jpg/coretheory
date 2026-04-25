@@ -1,9 +1,11 @@
 import { ExerciseCard } from "@/components/ExerciseCard";
+import { PremiumGate } from "@/components/PremiumGate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CATEGORIES, EXERCISES } from "@/data/exercises";
+import { useAccessControl } from "@/hooks/useAccessControl";
 import type { Category, Difficulty, Exercise, SortOption } from "@/types";
 import {
   ChevronDown,
@@ -84,11 +86,68 @@ function deleteParam(key: string) {
 // ── Props ────────────────────────────────────────────────────────────────
 interface BrowsePageProps {
   onSelect: (exercise: Exercise) => void;
+  onUpgrade?: () => void;
+}
+
+// ── Locked exercise card wrapper ─────────────────────────────────────────
+function LockedExerciseCard({
+  exercise,
+  index,
+  onUpgrade,
+  isPremium,
+  isFounder,
+  accessReady,
+  forceFounderUnlock,
+}: {
+  exercise: Exercise;
+  index: number;
+  onUpgrade?: () => void;
+  isPremium: boolean;
+  isFounder: boolean | null;
+  accessReady: boolean;
+  forceFounderUnlock: boolean;
+}) {
+  // forceFounderUnlock is the permanent latch — highest priority
+  if (forceFounderUnlock) {
+    return (
+      <ExerciseCard exercise={exercise} index={index} onSelect={() => {}} />
+    );
+  }
+  // If access isn't ready or founder/premium: always render plain card
+  if (!accessReady || isFounder === true || isPremium) {
+    return (
+      <ExerciseCard exercise={exercise} index={index} onSelect={() => {}} />
+    );
+  }
+
+  return (
+    <PremiumGate
+      isPremium={isPremium}
+      isFounder={isFounder}
+      accessReady={accessReady}
+      forceFounderUnlock={forceFounderUnlock}
+      onUpgrade={onUpgrade ?? (() => {})}
+      variant="card"
+    >
+      <ExerciseCard
+        exercise={exercise}
+        index={index}
+        onSelect={() => {}} // locked — no navigation
+      />
+    </PremiumGate>
+  );
 }
 
 // ── BrowsePage ───────────────────────────────────────────────────────────
-export function BrowsePage({ onSelect }: BrowsePageProps) {
+export function BrowsePage({ onSelect, onUpgrade }: BrowsePageProps) {
   const searchRef = useRef<HTMLInputElement>(null);
+  const {
+    isPremium,
+    isFounder,
+    accessReady,
+    forceFounderUnlock,
+    isExerciseLocked,
+  } = useAccessControl();
 
   // Read initial state from URL
   const init = useMemo((): {
@@ -199,6 +258,17 @@ export function BrowsePage({ onSelect }: BrowsePageProps) {
   const currentSortLabel =
     SORT_OPTIONS.find((s) => s.value === sort)?.label ?? "A → Z";
 
+  /**
+   * accessReady is the single gate from useAccessControl.
+   * Until accessReady, treat ALL exercises as unlocked.
+   */
+
+  // Count locked (advanced) exercises — only relevant for non-premium, non-founder users
+  const lockedCount =
+    accessReady && !isPremium && isFounder !== true
+      ? filtered.filter((e) => e.difficulty === "Advanced").length
+      : 0;
+
   return (
     /* Full-page background wrapper */
     <div
@@ -213,8 +283,7 @@ export function BrowsePage({ onSelect }: BrowsePageProps) {
     >
       {/* Strong dark overlay — 72% opacity */}
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: "rgba(0,0,0,0.72)" }}
+        className="absolute inset-0 pointer-events-none bg-black/70"
         aria-hidden
       />
 
@@ -533,9 +602,9 @@ export function BrowsePage({ onSelect }: BrowsePageProps) {
             )}
           </div>
 
-          {/* ── Results count & active filter summary ──────────────── */}
+          {/* ── Results count & premium notice ───────────────────────── */}
           <div
-            className="flex items-center justify-between mb-6"
+            className="flex items-center justify-between mb-6 flex-wrap gap-3"
             data-ocid="browse.results_count"
           >
             <p className="text-sm text-white/60">
@@ -549,17 +618,30 @@ export function BrowsePage({ onSelect }: BrowsePageProps) {
               </strong>{" "}
               exercise{EXERCISES.length !== 1 ? "s" : ""}
             </p>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="text-xs text-white/50 hover:text-white flex items-center gap-1 transition-colors"
-                data-ocid="browse.reset_filters_inline_button"
-              >
-                <RotateCcw className="w-3 h-3" />
-                Clear all
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {lockedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={onUpgrade}
+                  data-ocid="browse.premium_notice_button"
+                  className="flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+                >
+                  🔒 {lockedCount} advanced exercise
+                  {lockedCount !== 1 ? "s" : ""} locked — Unlock Premium
+                </button>
+              )}
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-xs text-white/50 hover:text-white flex items-center gap-1 transition-colors"
+                  data-ocid="browse.reset_filters_inline_button"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
 
           {/* ── Grid / Empty state ──────────────────────────────────── */}
@@ -570,14 +652,38 @@ export function BrowsePage({ onSelect }: BrowsePageProps) {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               data-ocid="browse.exercises_list"
             >
-              {filtered.map((exercise, i) => (
-                <ExerciseCard
-                  key={exercise.id}
-                  exercise={exercise}
-                  index={i}
-                  onSelect={onSelect}
-                />
-              ))}
+              {filtered.map((exercise, i) => {
+                /**
+                 * Lock decision delegated entirely to useAccessControl.isExerciseLocked().
+                 * That function returns false until accessReady=true, ensuring
+                 * no lock UI ever flashes while founder status is loading.
+                 */
+                const isLocked = isExerciseLocked(exercise);
+
+                return isLocked ? (
+                  <div
+                    key={exercise.id}
+                    data-ocid={`browse.exercise.item.${i + 1}`}
+                  >
+                    <LockedExerciseCard
+                      exercise={exercise}
+                      index={i}
+                      onUpgrade={onUpgrade}
+                      isPremium={isPremium}
+                      isFounder={isFounder}
+                      accessReady={accessReady}
+                      forceFounderUnlock={forceFounderUnlock}
+                    />
+                  </div>
+                ) : (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    index={i}
+                    onSelect={onSelect}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

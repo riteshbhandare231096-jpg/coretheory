@@ -1,12 +1,16 @@
+import type { View } from "@/App";
 import { Header } from "@/components/Header";
 import type { ReactNode } from "react";
 
+type NavView = Exclude<View, "detail">;
+
 interface LayoutProps {
   children: ReactNode;
-  onNavigate: (view: "home" | "browse" | "search") => void;
-  currentView: "home" | "browse" | "search";
+  onNavigate: (view: NavView) => void;
+  currentView: NavView;
   onOpenAI?: () => void;
   aiOpen?: boolean;
+  onUpgrade?: () => void;
 }
 
 const year = new Date().getFullYear();
@@ -17,6 +21,7 @@ export function Layout({
   currentView,
   onOpenAI = () => {},
   aiOpen = false,
+  onUpgrade,
 }: LayoutProps) {
   const hostname =
     typeof window !== "undefined" ? window.location.hostname : "";
@@ -29,6 +34,7 @@ export function Layout({
         currentView={currentView}
         onOpenAI={onOpenAI}
         aiOpen={aiOpen}
+        onUpgrade={onUpgrade}
       />
       <main className="flex-1">{children}</main>
       <footer className="bg-card border-t border-border mt-16">

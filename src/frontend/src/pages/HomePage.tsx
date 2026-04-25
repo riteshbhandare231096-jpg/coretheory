@@ -10,12 +10,84 @@ import {
   Dumbbell,
   Flame,
   Layers,
+  Quote,
   Star,
   TrendingUp,
   Users,
   Zap,
 } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+// ── Core Theory Pillars ──────────────────────────────────────────────────
+interface Pillar {
+  emoji: string;
+  color: string;
+  accent: string;
+  border: string;
+  title: string;
+  subtitle: string;
+  body: string;
+  stat: string;
+  statLabel: string;
+}
+
+const PILLARS: Pillar[] = [
+  {
+    emoji: "🏋️",
+    color: "from-primary/15 via-primary/5 to-transparent",
+    accent: "text-primary",
+    border: "border-primary/25 hover:border-primary/55",
+    title: "Resistance Training",
+    subtitle: "Build the engine",
+    body: "Muscle is your metabolic currency. Structured progressive overload preserves lean mass, elevates resting metabolic rate, and reshapes body composition far beyond what cardio alone can achieve.",
+    stat: "↑ RMR",
+    statLabel: "resting metabolic rate",
+  },
+  {
+    emoji: "🎯",
+    color: "from-secondary/15 via-secondary/5 to-transparent",
+    accent: "text-secondary",
+    border: "border-secondary/25 hover:border-secondary/55",
+    title: "Metabolic Nutrition",
+    subtitle: "Precision fuelling",
+    body: "Calories are not equal — macronutrient composition determines whether you lose fat or muscle. Evidence-based caloric periodisation and protein-first protocols fuel performance and accelerate recovery.",
+    stat: "Macro-precise",
+    statLabel: "caloric strategy",
+  },
+  {
+    emoji: "⚡",
+    color: "from-accent/15 via-accent/5 to-transparent",
+    accent: "text-accent",
+    border: "border-accent/25 hover:border-accent/55",
+    title: "NEAT Optimisation",
+    subtitle: "The silent multiplier",
+    body: "Non-Exercise Activity Thermogenesis accounts for up to 30% of daily calorie expenditure. Systematically increasing everyday movement stacks an invisible second workout on top of your training.",
+    stat: "Up to 30%",
+    statLabel: "of daily calorie burn",
+  },
+];
+
+// ── Intersection-observer animation hook ────────────────────────────────
+function useReveal(threshold = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
 
 // ── Types ────────────────────────────────────────────────────────────────
 type View = "home" | "browse" | "search";
@@ -70,6 +142,7 @@ const FEATURED_IDS = [
 // ── HomePage ─────────────────────────────────────────────────────────────
 export function HomePage({ onNavigate, onSelect }: HomePageProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const theoryReveal = useReveal();
 
   const featured = FEATURED_IDS.map((id) =>
     EXERCISES.find((e) => e.id === id),
@@ -179,6 +252,143 @@ export function HomePage({ onNavigate, onSelect }: HomePageProps) {
         </div>
       </section>
 
+      {/* ── WHAT IS CORE THEORY? ──────────────────────────────── */}
+      <section
+        className="py-24 md:py-32 bg-background border-b border-border relative overflow-hidden"
+        data-ocid="core_theory.section"
+      >
+        {/* Background accent blobs */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-primary/6 blur-[120px]" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-accent/5 blur-[100px]" />
+        </div>
+
+        <div className="relative container mx-auto px-4">
+          {/* Section header */}
+          <div
+            ref={theoryReveal.ref}
+            className="text-center mb-16"
+            style={{
+              opacity: theoryReveal.visible ? 1 : 0,
+              transform: theoryReveal.visible
+                ? "translateY(0)"
+                : "translateY(28px)",
+              transition: "opacity 0.65s ease, transform 0.65s ease",
+            }}
+          >
+            <Badge
+              variant="outline"
+              className="mb-4 text-xs font-semibold tracking-widest uppercase px-3 py-1 border-primary/40 text-primary"
+            >
+              The Methodology
+            </Badge>
+            <h2 className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl text-foreground tracking-tight mb-5">
+              What is <span className="text-gradient">Core Theory?</span>
+            </h2>
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+              Core Theory is a science-first fitness methodology — not a workout
+              programme, but a complete operating system for the human body.
+              Three evidence-based pillars work in synergy to build lean muscle,
+              eliminate fat, and sustain results without crash cycles or
+              guesswork.
+            </p>
+          </div>
+
+          {/* Pillar cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {PILLARS.map((pillar, i) => (
+              <div
+                key={pillar.title}
+                className={`group relative overflow-hidden rounded-2xl border bg-card p-7 flex flex-col gap-4 transition-smooth ${pillar.border}`}
+                data-ocid={`core_theory.pillar.${i + 1}`}
+                style={{
+                  opacity: theoryReveal.visible ? 1 : 0,
+                  transform: theoryReveal.visible
+                    ? "translateY(0)"
+                    : "translateY(36px)",
+                  transition: `opacity 0.65s ease ${i * 0.15}s, transform 0.65s ease ${i * 0.15}s`,
+                }}
+              >
+                {/* Top gradient fill */}
+                <div
+                  className={`absolute inset-x-0 top-0 h-40 bg-gradient-to-b ${pillar.color} opacity-60 pointer-events-none`}
+                  aria-hidden
+                />
+                {/* Accent top stripe */}
+                <div
+                  className={`absolute top-0 left-6 right-6 h-[2px] rounded-full bg-gradient-to-r ${
+                    i === 0
+                      ? "from-primary to-primary/30"
+                      : i === 1
+                        ? "from-secondary to-secondary/30"
+                        : "from-accent to-accent/30"
+                  }`}
+                  aria-hidden
+                />
+
+                {/* Icon + subtitle row */}
+                <div className="relative flex items-center gap-3 mt-2">
+                  <span
+                    className="text-4xl leading-none transition-smooth group-hover:scale-110 group-hover:-rotate-6 inline-block"
+                    role="img"
+                    aria-hidden
+                  >
+                    {pillar.emoji}
+                  </span>
+                  <span
+                    className={`text-xs font-bold uppercase tracking-widest ${pillar.accent} opacity-80`}
+                  >
+                    {pillar.subtitle}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="relative font-display font-extrabold text-2xl text-foreground tracking-tight leading-tight">
+                  {pillar.title}
+                </h3>
+
+                {/* Body */}
+                <p className="relative text-muted-foreground text-sm leading-relaxed flex-1">
+                  {pillar.body}
+                </p>
+
+                {/* Stat chip */}
+                <div className="relative flex items-baseline gap-2 pt-2 border-t border-border/60">
+                  <span
+                    className={`font-display font-extrabold text-xl ${pillar.accent}`}
+                  >
+                    {pillar.stat}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    {pillar.statLabel}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom CTA nudge */}
+          <div
+            className="mt-14 text-center"
+            style={{
+              opacity: theoryReveal.visible ? 1 : 0,
+              transition: "opacity 0.65s ease 0.55s",
+            }}
+          >
+            <Button
+              size="lg"
+              onClick={() => onNavigate("browse")}
+              className="gap-2 font-bold px-10 transition-smooth hover:scale-105"
+              data-ocid="core_theory.browse_button"
+            >
+              <Dumbbell className="w-4 h-4" />
+              Apply the theory — browse exercises
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* ── STATS BAR ─────────────────────────────────────────── */}
       <section
         className="bg-muted/40 border-b border-border py-10"
@@ -203,6 +413,131 @@ export function HomePage({ onNavigate, onSelect }: HomePageProps) {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── MEET THE FOUNDER ──────────────────────────────────── */}
+      <section
+        className="py-20 border-b border-border relative overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background)) 60%, hsl(var(--card)) 100%)",
+        }}
+        data-ocid="founder.section"
+      >
+        {/* Decorative teal glow blobs */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute top-[-60px] right-[-60px] w-[320px] h-[320px] rounded-full bg-primary/8 blur-[90px]" />
+          <div className="absolute bottom-[-40px] left-[-40px] w-[260px] h-[260px] rounded-full bg-secondary/6 blur-[80px]" />
+        </div>
+
+        <div className="relative container mx-auto px-4">
+          {/* Section label */}
+          <div className="text-center mb-12">
+            <Badge
+              variant="outline"
+              className="mb-3 text-xs font-semibold tracking-widest uppercase px-3 py-1 border-primary/40 text-primary"
+            >
+              The Founder
+            </Badge>
+            <h2 className="font-display font-extrabold text-4xl md:text-5xl text-foreground tracking-tight">
+              Meet the <span className="text-gradient">Founder</span>
+            </h2>
+          </div>
+
+          {/* Card */}
+          <div
+            className="max-w-4xl mx-auto rounded-3xl border border-border bg-card/80 backdrop-blur-sm shadow-subtle overflow-hidden"
+            data-ocid="founder.card"
+          >
+            {/* Top accent stripe */}
+            <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-accent" />
+
+            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 p-8 md:p-12">
+              {/* Avatar */}
+              <div
+                className="shrink-0 flex flex-col items-center gap-4"
+                data-ocid="founder.avatar"
+              >
+                <div className="relative">
+                  {/* Glow ring */}
+                  <div
+                    className="absolute inset-0 rounded-full bg-primary/20 blur-xl scale-110"
+                    aria-hidden
+                  />
+                  <img
+                    src="/assets/images/founder-profile.jpg"
+                    alt="Ritesh Bhandare — Founder of CORE Theory Library"
+                    className="relative w-32 h-32 md:w-36 md:h-36 rounded-full object-cover object-top border-4 border-primary/40 shadow-lg"
+                  />
+                </div>
+                {/* Free access badge */}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-bold tracking-wide">
+                  <Star className="w-3 h-3 fill-current" />
+                  Founder — Free Access
+                </span>
+              </div>
+
+              {/* Text content */}
+              <div className="flex-1 min-w-0 text-center md:text-left">
+                {/* Quote icon */}
+                <Quote
+                  className="w-8 h-8 text-primary/30 mb-4 mx-auto md:mx-0"
+                  aria-hidden
+                />
+
+                <h3
+                  className="font-display font-extrabold text-3xl md:text-4xl text-foreground tracking-tight mb-1"
+                  data-ocid="founder.name"
+                >
+                  Ritesh Bhandare
+                </h3>
+                <p
+                  className="text-primary font-semibold text-sm tracking-wide uppercase mb-5"
+                  data-ocid="founder.title"
+                >
+                  Founder &amp; Creator, CORE Theory Library
+                </p>
+
+                <p
+                  className="text-muted-foreground leading-relaxed text-base mb-6 max-w-prose"
+                  data-ocid="founder.bio"
+                >
+                  CORE Theory Library was built from a passion for fitness,
+                  science, and making world-class exercise knowledge accessible
+                  to everyone. Ritesh Bhandare created this platform to bridge
+                  the gap between complex training theory and real-world results
+                  — for beginners and advanced athletes alike. As founder, he is
+                  committed to continuously growing this library and the CORE AI
+                  to serve your fitness journey.
+                </p>
+
+                {/* Divider */}
+                <div
+                  className="w-16 h-px bg-gradient-to-r from-primary to-transparent mb-5 mx-auto md:mx-0"
+                  aria-hidden
+                />
+
+                {/* Key stats row */}
+                <div className="flex flex-wrap justify-center md:justify-start gap-6">
+                  {[
+                    { value: `${EXERCISES.length}+`, label: "Exercises Built" },
+                    { value: "8", label: "Categories" },
+                    { value: "CORE AI", label: "Powered" },
+                  ].map(({ value, label }) => (
+                    <div key={label} className="text-center md:text-left">
+                      <div className="font-display font-extrabold text-xl text-primary">
+                        {value}
+                      </div>
+                      <div className="text-muted-foreground text-xs font-medium">
+                        {label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

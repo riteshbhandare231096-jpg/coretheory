@@ -44,7 +44,10 @@ Professional athlete lifestyle brand. Energetic but controlled. Sophisticated, n
 | Zone | Background | Border | Shadow | Notes |
 | --- | --- | --- | --- | --- |
 | Header | `bg-card` with `border-b` | `border-border` | `shadow-subtle` | Logo, nav, dark/light toggle |
-| Hero | `bg-gradient-to-r` (primary→accent) | None | None | Full-width tagline + CTA, text-gradient accent |
+| Hero (New) | `hero-gradient` (primary→accent) | None | None | Full-width value prop, three pillars explanation, text-gradient accent |
+| Metric Dashboard (New) | `bg-background` | None | None | Card grid (1/2/3 col), each card: `bg-card` with `border-border` and `shadow-subtle` hover |
+| TDEE Calculator (New) | `bg-background` | None | None | Form inputs left, results card right (`bg-card` border-border shadow-subtle) |
+| Science Articles (New) | `bg-background` | None | None | Article cards grid (3/2/1 col): `bg-card` border-border `shadow-elevated` on hover |
 | Content Grid | `bg-background` | None | None | Light/dark-appropriate background |
 | Exercise Cards | `bg-card` | `border-border` | `shadow-elevated` on hover | Thumbnail, title, difficulty, tags, play-icon overlay |
 | Footer | `bg-card` with `border-t` | `border-border` | `shadow-subtle` | Muted text, links, credit |
@@ -52,57 +55,30 @@ Professional athlete lifestyle brand. Energetic but controlled. Sophisticated, n
 
 ## Component Patterns
 
-### Exercise Cards
-- Aspect ratio 16:9 thumbnail with play-icon overlay (appears on hover)
-- Title, difficulty badge, 2–3 category tags below thumbnail
-- Smooth hover: scale(1.02), shadow elevation, icon fade-in
-- Tag colors: primary (teal) for active category, muted for inactive
-
-### Difficulty System
-- Color-coded badges with semantic borders and backgrounds
-- Inline with exercise title or in dedicated row
-- Icon + text: "Beginner" / "Intermediate" / "Advanced"
-
-### Navigation & Filtering
-- Sticky header with category pills (horizontal scroll on mobile)
-- Active category: `bg-primary` text-white, inactive: `bg-muted` text-muted-foreground
-- Search bar with debounce, icon-prefixed input
-
-### Video Embed
-- YouTube iframe with standard player controls
-- Width: 100%, maintains 16:9 aspect ratio
-- Modal overlay on exercise card click
+| Component | Layout | Notes |
+| --- | --- | --- |
+| Hero (New) | Full-width gradient (primary→accent) | Headline explaining three pillars + CTA, text-gradient accent, responsive stacked mobile |
+| Metric Dashboard (New) | 3-col desktop grid (1 mobile, 2 tablet) | Card-based with sparkline trends, weight/body-fat/PRs, toggle metric units |
+| TDEE Calculator (New) | 2-col desktop (stacked mobile) | Form left, results card right, macro split bars, copy/export |
+| Science Articles (New) | 3-col editorial grid (1 mobile, 2 tablet) | Article cards with 3:2 thumbnail, category tags, hover scale+shadow, filterable by category |
+| Exercise Cards | 16:9 thumbnail with play-icon overlay | Difficulty badge, 2–3 tags, smooth hover: scale(1.02) + shadow elevation |
+| Navigation & Filtering | Sticky horizontal pill filter | Active: `bg-primary`, inactive: `bg-muted`, search with icon |
+| Video Embed | YouTube iframe, 16:9 aspect ratio | Modal overlay on exercise card click |
 
 ## Motion & Interaction
-- Transitions: `all 0.3s cubic-bezier(0.4, 0, 0.2, 1)` (smooth easing)
-- Hover states: card scale(1.02) + shadow elevation, button opacity/color shift
-- Icon animations: fade-in (0.4s), slide-up (0.4s) on load
-- No bouncy or jarring animations; all movement refined
+Smooth transitions (0.3s easing); card hover: scale(1.02) + shadow lift; chart animations fade + sparkline reveal (0.6s); article hover: scale(1.02) + shadow. No bounce.
 
 ## Responsive Breakpoints
-- Mobile: <640px (stacked layout, 1 column)
-- Tablet: 640px–1024px (2 column grid)
-- Desktop: >1024px (3–4 column grid, sidebar navigation)
+Mobile <640px (1 col); Tablet 640–1024px (2 col); Desktop >1024px (3–4 col grid).
 
 ## Dark Mode
-- Class-based toggle: `.dark` applied to `<html>` element
-- All OKLCH values tuned for readability in dark mode (L increased for foreground, decreased for background)
-- Persistent preference stored in localStorage
+Class-based toggle (`.dark` on `<html>`); all OKLCH tuned for dark readability; persistent localStorage preference.
 
 ## Constraints
-- No full-page gradients; use accents only on hero or CTAs
-- No neon or glow effects; prefer depth via shadows
-- No more than 3 font sizes for body text (regular, sm, lg)
-- All interactive elements have clear focus states (`:focus-visible`)
-- Video thumbnails use actual YouTube preview images or solid fallback
+No full-page gradients (hero only). No neon. Max 3 body text sizes. Focus-visible rings. Actual image previews or solid fallback.
 
 ## Signature Detail
-**Color-coded difficulty rings + play-icon overlay.** When hovering over an exercise card, the play icon fades in center-aligned on the thumbnail, and the card lifts with elevated shadow. The difficulty badge remains anchored below, creating a clear visual hierarchy that emphasizes difficulty level and encourages click-through to watch the exercise demonstration.
+Gradient hero (three pillars) + metric sparkline trends + editorial science articles (category-filtered) establish athletic authority through refined hierarchy and no hype.
 
 ## Accessibility
-- WCAG AA contrast maintained in both light and dark modes
-- All interactive elements keyboard-navigable (tabindex=0)
-- Semantic HTML: `<button>`, `<a>`, `<section>`, `<article>` for screen readers
-- Form labels always paired with inputs
-- Focus indicators visible (ring-primary on focus-visible)
-- Alt text for all images, YouTube iframe titles
+WCAG AA contrast both modes; semantic HTML + keyboard nav; focus visible (ring-primary); labels + alt text; form validation in place.

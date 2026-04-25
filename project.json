@@ -1,23 +1,29 @@
 {
-  "overview": "CORE Theory Library is a fitness platform with 50+ exercises and a CORE AI assistant that provides personalized guidance on nutrition, diet, and exercise recommendations through a conversational chat interface.",
+  "overview": "CORE Theory is a science-based fitness platform with 80+ exercises, animated muscle highlights, AI coaching, special dashboards for disabled and women users, metric tracking, TDEE calculator, and Stripe-powered premium plans.",
   "features": [
-    "50+ exercise library across 8 categories",
-    "CORE AI chat assistant for nutrition and diet guidance",
-    "Personalized exercise recommendations",
-    "Animated exercise demonstrations",
-    "Dark/light mode",
-    "Search and filtering by difficulty, muscle group, and equipment",
-    "Responsive design for all devices"
+    "80+ exercises with animated glowing muscle highlights",
+    "CORE AI fitness and nutrition coaching assistant",
+    "Special dashboards for disabled users and women",
+    "Founder dashboard with client stats and revenue tracking",
+    "Metric tracking with progress charts",
+    "TDEE calculator for calorie and macro planning",
+    "Science-based articles library",
+    "Stripe-powered premium subscriptions (3/6/9/12 months)",
+    "Internet Identity authentication",
+    "Push-up, pull-up, squat variants, and dedicated warmup category"
   ],
   "category": "health-fitness",
   "tags": [
     "fitness",
     "exercise",
+    "ai-coaching",
+    "muscle-animation",
     "nutrition",
-    "diet",
-    "ai-assistant",
-    "workout",
-    "health"
+    "wellness",
+    "strength-training",
+    "warmup",
+    "premium",
+    "accessibility"
   ],
-  "last_updated": "2026-04-19T16:25:11.960Z"
+  "last_updated": "2026-04-21T16:43:30.541Z"
 }

@@ -10,20 +10,135 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type AiQueryResult = {
+    'ok' : { 'messagesRemaining' : [] | [bigint], 'response' : string }
+  } |
+  { 'err' : string };
+export type ArticleCategory = { 'fatLoss' : null } |
+  { 'recovery' : null } |
+  { 'hypertrophy' : null } |
+  { 'nutrition' : null };
+export type CheckoutResult = {
+    'ok' : { 'url' : string, 'sessionId' : string }
+  } |
+  { 'err' : string };
+export interface DisabledExercise {
+  'id' : bigint,
+  'title' : string,
+  'difficulty' : string,
+  'description' : string,
+  'instructions' : Array<string>,
+  'category' : string,
+  'benefits' : Array<string>,
+  'videoUrl' : string,
+}
+export interface FounderDashboardStats {
+  'freeCount' : bigint,
+  'months3Count' : bigint,
+  'months6Count' : bigint,
+  'months9Count' : bigint,
+  'totalRevenue' : bigint,
+  'months12Count' : bigint,
+}
+export interface MetricEntry {
+  'bodyFatPct' : [] | [number],
+  'weightKg' : number,
+  'loggedAt' : Timestamp,
+}
+export type MetricResult = { 'ok' : null } |
+  { 'err' : string };
+export interface PersonalBest {
+  'reps' : bigint,
+  'weightKg' : number,
+  'exerciseName' : string,
+  'loggedAt' : Timestamp,
+}
+export type PlanDuration = { 'months12' : null } |
+  { 'months3' : null } |
+  { 'months6' : null } |
+  { 'months9' : null };
+export interface ScienceArticle {
+  'id' : bigint,
+  'title' : string,
+  'content' : string,
+  'readingMinutes' : bigint,
+  'publishedDate' : string,
+  'summary' : string,
+  'category' : ArticleCategory,
+}
+export interface SubscriptionPlan {
+  'duration' : PlanDuration,
+  'displayLabel' : string,
+  'stripePriceId' : string,
+  'priceUsdCents' : bigint,
+}
+export type Tier = { 'premium' : null } |
+  { 'free' : null };
+export type Timestamp = bigint;
+export type UdidUploadResult = { 'ok' : null } |
+  { 'err' : string };
+export type UserId = Principal;
+export interface UserProfilePublic {
+  'startedAt' : [] | [Timestamp],
+  'expiresAt' : [] | [Timestamp],
+  'stripeSubscriptionId' : [] | [string],
+  'userId' : UserId,
+  'plan' : [] | [PlanDuration],
+  'tier' : Tier,
+  'udidUploadPath' : string,
+  'udidUploadTime' : [] | [Timestamp],
+  'stripeCustomerId' : [] | [string],
+  'udidVerified' : boolean,
+  'isDisabled' : boolean,
+}
+export type WebhookResult = { 'ok' : null } |
+  { 'err' : string };
+export interface WomenExercise {
+  'id' : bigint,
+  'title' : string,
+  'section' : WomenExerciseSection,
+  'description' : string,
+  'instructions' : Array<string>,
+  'category' : string,
+  'benefits' : Array<string>,
+  'videoUrl' : string,
+}
+export type WomenExerciseSection = { 'advanced' : null } |
+  { 'basic' : null };
 export interface _SERVICE {
-  /**
-   * / Query CORE AI with a conversation history.
-   * / messages: array of { role: "user" | "assistant"; content: Text }
-   * / Returns the AI response text or an error message string.
-   */
+  'cancelSubscription' : ActorMethod<[], undefined>,
+  'clearMyMetrics' : ActorMethod<[], undefined>,
+  'createCheckoutSession' : ActorMethod<[PlanDuration], CheckoutResult>,
+  'getArticle' : ActorMethod<[bigint], [] | [ScienceArticle]>,
+  'getArticles' : ActorMethod<[], Array<ScienceArticle>>,
+  'getDisabledExercises' : ActorMethod<[], Array<DisabledExercise>>,
+  'getFounderDashboardStats' : ActorMethod<[], FounderDashboardStats>,
+  'getIsDisabledVerified' : ActorMethod<[], boolean>,
+  'getIsFounder' : ActorMethod<[], boolean>,
+  'getMyMetrics' : ActorMethod<[], Array<MetricEntry>>,
+  'getMyPersonalBests' : ActorMethod<[], Array<PersonalBest>>,
+  'getMyProfile' : ActorMethod<[], UserProfilePublic>,
+  'getSubscriptionPlans' : ActorMethod<[], Array<SubscriptionPlan>>,
+  'getWomenDashboardAccess' : ActorMethod<[], boolean>,
+  'getWomenExercises' : ActorMethod<
+    [],
+    { 'advanced' : Array<WomenExercise>, 'basic' : Array<WomenExercise> }
+  >,
+  'logMetric' : ActorMethod<[number, [] | [number]], MetricResult>,
+  'logPersonalBest' : ActorMethod<[string, number, bigint], MetricResult>,
   'queryAI' : ActorMethod<
     [Array<{ 'content' : string, 'role' : string }>],
     string
   >,
-  /**
-   * / Update the OpenRouter API key. Only callable by canister controllers.
-   */
+  'queryAIGated' : ActorMethod<
+    [Array<{ 'content' : string, 'role' : string }>, bigint],
+    AiQueryResult
+  >,
   'setApiKey' : ActorMethod<[string], undefined>,
+  'setFounderPrincipal' : ActorMethod<[Principal], undefined>,
+  'setStripeKey' : ActorMethod<[string], undefined>,
+  'stripeWebhook' : ActorMethod<[string], WebhookResult>,
+  'submitUdidUpload' : ActorMethod<[string], UdidUploadResult>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

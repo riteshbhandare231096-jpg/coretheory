@@ -8,25 +8,334 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const PlanDuration = IDL.Variant({
+  'months12' : IDL.Null,
+  'months3' : IDL.Null,
+  'months6' : IDL.Null,
+  'months9' : IDL.Null,
+});
+export const CheckoutResult = IDL.Variant({
+  'ok' : IDL.Record({ 'url' : IDL.Text, 'sessionId' : IDL.Text }),
+  'err' : IDL.Text,
+});
+export const ArticleCategory = IDL.Variant({
+  'fatLoss' : IDL.Null,
+  'recovery' : IDL.Null,
+  'hypertrophy' : IDL.Null,
+  'nutrition' : IDL.Null,
+});
+export const ScienceArticle = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'content' : IDL.Text,
+  'readingMinutes' : IDL.Nat,
+  'publishedDate' : IDL.Text,
+  'summary' : IDL.Text,
+  'category' : ArticleCategory,
+});
+export const DisabledExercise = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'difficulty' : IDL.Text,
+  'description' : IDL.Text,
+  'instructions' : IDL.Vec(IDL.Text),
+  'category' : IDL.Text,
+  'benefits' : IDL.Vec(IDL.Text),
+  'videoUrl' : IDL.Text,
+});
+export const FounderDashboardStats = IDL.Record({
+  'freeCount' : IDL.Nat,
+  'months3Count' : IDL.Nat,
+  'months6Count' : IDL.Nat,
+  'months9Count' : IDL.Nat,
+  'totalRevenue' : IDL.Nat,
+  'months12Count' : IDL.Nat,
+});
+export const Timestamp = IDL.Int;
+export const MetricEntry = IDL.Record({
+  'bodyFatPct' : IDL.Opt(IDL.Float64),
+  'weightKg' : IDL.Float64,
+  'loggedAt' : Timestamp,
+});
+export const PersonalBest = IDL.Record({
+  'reps' : IDL.Nat,
+  'weightKg' : IDL.Float64,
+  'exerciseName' : IDL.Text,
+  'loggedAt' : Timestamp,
+});
+export const UserId = IDL.Principal;
+export const Tier = IDL.Variant({ 'premium' : IDL.Null, 'free' : IDL.Null });
+export const UserProfilePublic = IDL.Record({
+  'startedAt' : IDL.Opt(Timestamp),
+  'expiresAt' : IDL.Opt(Timestamp),
+  'stripeSubscriptionId' : IDL.Opt(IDL.Text),
+  'userId' : UserId,
+  'plan' : IDL.Opt(PlanDuration),
+  'tier' : Tier,
+  'udidUploadPath' : IDL.Text,
+  'udidUploadTime' : IDL.Opt(Timestamp),
+  'stripeCustomerId' : IDL.Opt(IDL.Text),
+  'udidVerified' : IDL.Bool,
+  'isDisabled' : IDL.Bool,
+});
+export const SubscriptionPlan = IDL.Record({
+  'duration' : PlanDuration,
+  'displayLabel' : IDL.Text,
+  'stripePriceId' : IDL.Text,
+  'priceUsdCents' : IDL.Nat,
+});
+export const WomenExerciseSection = IDL.Variant({
+  'advanced' : IDL.Null,
+  'basic' : IDL.Null,
+});
+export const WomenExercise = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'section' : WomenExerciseSection,
+  'description' : IDL.Text,
+  'instructions' : IDL.Vec(IDL.Text),
+  'category' : IDL.Text,
+  'benefits' : IDL.Vec(IDL.Text),
+  'videoUrl' : IDL.Text,
+});
+export const MetricResult = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+export const AiQueryResult = IDL.Variant({
+  'ok' : IDL.Record({
+    'messagesRemaining' : IDL.Opt(IDL.Nat),
+    'response' : IDL.Text,
+  }),
+  'err' : IDL.Text,
+});
+export const WebhookResult = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+export const UdidUploadResult = IDL.Variant({
+  'ok' : IDL.Null,
+  'err' : IDL.Text,
+});
+
 export const idlService = IDL.Service({
+  'cancelSubscription' : IDL.Func([], [], []),
+  'clearMyMetrics' : IDL.Func([], [], []),
+  'createCheckoutSession' : IDL.Func([PlanDuration], [CheckoutResult], []),
+  'getArticle' : IDL.Func([IDL.Nat], [IDL.Opt(ScienceArticle)], ['query']),
+  'getArticles' : IDL.Func([], [IDL.Vec(ScienceArticle)], ['query']),
+  'getDisabledExercises' : IDL.Func([], [IDL.Vec(DisabledExercise)], ['query']),
+  'getFounderDashboardStats' : IDL.Func([], [FounderDashboardStats], ['query']),
+  'getIsDisabledVerified' : IDL.Func([], [IDL.Bool], ['query']),
+  'getIsFounder' : IDL.Func([], [IDL.Bool], ['query']),
+  'getMyMetrics' : IDL.Func([], [IDL.Vec(MetricEntry)], ['query']),
+  'getMyPersonalBests' : IDL.Func([], [IDL.Vec(PersonalBest)], ['query']),
+  'getMyProfile' : IDL.Func([], [UserProfilePublic], []),
+  'getSubscriptionPlans' : IDL.Func([], [IDL.Vec(SubscriptionPlan)], ['query']),
+  'getWomenDashboardAccess' : IDL.Func([], [IDL.Bool], ['query']),
+  'getWomenExercises' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'advanced' : IDL.Vec(WomenExercise),
+          'basic' : IDL.Vec(WomenExercise),
+        }),
+      ],
+      ['query'],
+    ),
+  'logMetric' : IDL.Func(
+      [IDL.Float64, IDL.Opt(IDL.Float64)],
+      [MetricResult],
+      [],
+    ),
+  'logPersonalBest' : IDL.Func(
+      [IDL.Text, IDL.Float64, IDL.Nat],
+      [MetricResult],
+      [],
+    ),
   'queryAI' : IDL.Func(
       [IDL.Vec(IDL.Record({ 'content' : IDL.Text, 'role' : IDL.Text }))],
       [IDL.Text],
       [],
     ),
+  'queryAIGated' : IDL.Func(
+      [
+        IDL.Vec(IDL.Record({ 'content' : IDL.Text, 'role' : IDL.Text })),
+        IDL.Nat,
+      ],
+      [AiQueryResult],
+      [],
+    ),
   'setApiKey' : IDL.Func([IDL.Text], [], []),
+  'setFounderPrincipal' : IDL.Func([IDL.Principal], [], []),
+  'setStripeKey' : IDL.Func([IDL.Text], [], []),
+  'stripeWebhook' : IDL.Func([IDL.Text], [WebhookResult], []),
+  'submitUdidUpload' : IDL.Func([IDL.Text], [UdidUploadResult], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const PlanDuration = IDL.Variant({
+    'months12' : IDL.Null,
+    'months3' : IDL.Null,
+    'months6' : IDL.Null,
+    'months9' : IDL.Null,
+  });
+  const CheckoutResult = IDL.Variant({
+    'ok' : IDL.Record({ 'url' : IDL.Text, 'sessionId' : IDL.Text }),
+    'err' : IDL.Text,
+  });
+  const ArticleCategory = IDL.Variant({
+    'fatLoss' : IDL.Null,
+    'recovery' : IDL.Null,
+    'hypertrophy' : IDL.Null,
+    'nutrition' : IDL.Null,
+  });
+  const ScienceArticle = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'content' : IDL.Text,
+    'readingMinutes' : IDL.Nat,
+    'publishedDate' : IDL.Text,
+    'summary' : IDL.Text,
+    'category' : ArticleCategory,
+  });
+  const DisabledExercise = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'difficulty' : IDL.Text,
+    'description' : IDL.Text,
+    'instructions' : IDL.Vec(IDL.Text),
+    'category' : IDL.Text,
+    'benefits' : IDL.Vec(IDL.Text),
+    'videoUrl' : IDL.Text,
+  });
+  const FounderDashboardStats = IDL.Record({
+    'freeCount' : IDL.Nat,
+    'months3Count' : IDL.Nat,
+    'months6Count' : IDL.Nat,
+    'months9Count' : IDL.Nat,
+    'totalRevenue' : IDL.Nat,
+    'months12Count' : IDL.Nat,
+  });
+  const Timestamp = IDL.Int;
+  const MetricEntry = IDL.Record({
+    'bodyFatPct' : IDL.Opt(IDL.Float64),
+    'weightKg' : IDL.Float64,
+    'loggedAt' : Timestamp,
+  });
+  const PersonalBest = IDL.Record({
+    'reps' : IDL.Nat,
+    'weightKg' : IDL.Float64,
+    'exerciseName' : IDL.Text,
+    'loggedAt' : Timestamp,
+  });
+  const UserId = IDL.Principal;
+  const Tier = IDL.Variant({ 'premium' : IDL.Null, 'free' : IDL.Null });
+  const UserProfilePublic = IDL.Record({
+    'startedAt' : IDL.Opt(Timestamp),
+    'expiresAt' : IDL.Opt(Timestamp),
+    'stripeSubscriptionId' : IDL.Opt(IDL.Text),
+    'userId' : UserId,
+    'plan' : IDL.Opt(PlanDuration),
+    'tier' : Tier,
+    'udidUploadPath' : IDL.Text,
+    'udidUploadTime' : IDL.Opt(Timestamp),
+    'stripeCustomerId' : IDL.Opt(IDL.Text),
+    'udidVerified' : IDL.Bool,
+    'isDisabled' : IDL.Bool,
+  });
+  const SubscriptionPlan = IDL.Record({
+    'duration' : PlanDuration,
+    'displayLabel' : IDL.Text,
+    'stripePriceId' : IDL.Text,
+    'priceUsdCents' : IDL.Nat,
+  });
+  const WomenExerciseSection = IDL.Variant({
+    'advanced' : IDL.Null,
+    'basic' : IDL.Null,
+  });
+  const WomenExercise = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'section' : WomenExerciseSection,
+    'description' : IDL.Text,
+    'instructions' : IDL.Vec(IDL.Text),
+    'category' : IDL.Text,
+    'benefits' : IDL.Vec(IDL.Text),
+    'videoUrl' : IDL.Text,
+  });
+  const MetricResult = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  const AiQueryResult = IDL.Variant({
+    'ok' : IDL.Record({
+      'messagesRemaining' : IDL.Opt(IDL.Nat),
+      'response' : IDL.Text,
+    }),
+    'err' : IDL.Text,
+  });
+  const WebhookResult = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  const UdidUploadResult = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  
   return IDL.Service({
+    'cancelSubscription' : IDL.Func([], [], []),
+    'clearMyMetrics' : IDL.Func([], [], []),
+    'createCheckoutSession' : IDL.Func([PlanDuration], [CheckoutResult], []),
+    'getArticle' : IDL.Func([IDL.Nat], [IDL.Opt(ScienceArticle)], ['query']),
+    'getArticles' : IDL.Func([], [IDL.Vec(ScienceArticle)], ['query']),
+    'getDisabledExercises' : IDL.Func(
+        [],
+        [IDL.Vec(DisabledExercise)],
+        ['query'],
+      ),
+    'getFounderDashboardStats' : IDL.Func(
+        [],
+        [FounderDashboardStats],
+        ['query'],
+      ),
+    'getIsDisabledVerified' : IDL.Func([], [IDL.Bool], ['query']),
+    'getIsFounder' : IDL.Func([], [IDL.Bool], ['query']),
+    'getMyMetrics' : IDL.Func([], [IDL.Vec(MetricEntry)], ['query']),
+    'getMyPersonalBests' : IDL.Func([], [IDL.Vec(PersonalBest)], ['query']),
+    'getMyProfile' : IDL.Func([], [UserProfilePublic], []),
+    'getSubscriptionPlans' : IDL.Func(
+        [],
+        [IDL.Vec(SubscriptionPlan)],
+        ['query'],
+      ),
+    'getWomenDashboardAccess' : IDL.Func([], [IDL.Bool], ['query']),
+    'getWomenExercises' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'advanced' : IDL.Vec(WomenExercise),
+            'basic' : IDL.Vec(WomenExercise),
+          }),
+        ],
+        ['query'],
+      ),
+    'logMetric' : IDL.Func(
+        [IDL.Float64, IDL.Opt(IDL.Float64)],
+        [MetricResult],
+        [],
+      ),
+    'logPersonalBest' : IDL.Func(
+        [IDL.Text, IDL.Float64, IDL.Nat],
+        [MetricResult],
+        [],
+      ),
     'queryAI' : IDL.Func(
         [IDL.Vec(IDL.Record({ 'content' : IDL.Text, 'role' : IDL.Text }))],
         [IDL.Text],
         [],
       ),
+    'queryAIGated' : IDL.Func(
+        [
+          IDL.Vec(IDL.Record({ 'content' : IDL.Text, 'role' : IDL.Text })),
+          IDL.Nat,
+        ],
+        [AiQueryResult],
+        [],
+      ),
     'setApiKey' : IDL.Func([IDL.Text], [], []),
+    'setFounderPrincipal' : IDL.Func([IDL.Principal], [], []),
+    'setStripeKey' : IDL.Func([IDL.Text], [], []),
+    'stripeWebhook' : IDL.Func([IDL.Text], [WebhookResult], []),
+    'submitUdidUpload' : IDL.Func([IDL.Text], [UdidUploadResult], []),
   });
 };
 
